@@ -1,0 +1,1 @@
+export const getSearchedWeather = (state) => state.searchedWeather
