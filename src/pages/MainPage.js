@@ -40,13 +40,16 @@ export default function MainPage() {
       countries?.forEach((country) => {
           axios.get(`/weather?q=${country}&appid=d0aef4da9ac1a34e09e4ce9ff137ae24&units=imperial`).then(({data}) => {
             setCities(pr => {
+              console.log('pr', pr)
               if (pr && pr?.find(c => c.name === country)) {
                 return pr
               }
+              console.log('lllll')
             return [...pr, data]
           });
       })
     })
+    console.log('cities', cities)
     }, [countries]);
 
     async function updateCity({lat, lon, name}) {
@@ -64,7 +67,13 @@ export default function MainPage() {
 
     const { weather, loading } = searchCountry;
 
-    console.log('render')
+    const sortedCities = [];
+    if (countries.length === cities.length) {
+      countries.forEach(c => {
+        sortedCities.push(cities.find(({name}) => name === c))
+      }) 
+    }
+    
       return (
           <>
             <h1>
@@ -82,11 +91,10 @@ export default function MainPage() {
       ) :
         (<h2>make a search</h2>)}
       <h3>Your favourites countries</h3>
-      {cities ? (
+      {sortedCities.length > 0 ? (
         <ul style={{display:'flex', flexWrap:'wrap', margin:'0 auto'}}>
-          {cities.map((c,idx) => (
+          {sortedCities.map((c) => (
             <li style={{ border: '1px solid black',cursor:'pointer' }} key={uuidv4()}><p>{c.name}</p>
-              <p>{console.log('c.id', c.id)}</p>
                   <p>{c.dt}</p>
                   <div>
                       <Link to={`/details/${c.name}`}>Details</Link>
