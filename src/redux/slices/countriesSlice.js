@@ -7,7 +7,8 @@ import { getCountries } from "../countries/countriesSelectors";
 const updateElById = (arr, idx, updateData) => arr.map((item, id, arr) => arr.indexOf(item) === idx ? updateData : item)
 
 const deleteCity = (arr, name) => {
-  return arr.filter((el) => name !== el.name)
+  console.log(arr, name)
+  return arr.filter((el) => name !== el)
 }
 
 export const updateWeatherAction = createAsyncThunk(
@@ -15,7 +16,7 @@ export const updateWeatherAction = createAsyncThunk(
     async (payload, { rejectWithValue, getState, dispatch }) => {
         const { lat, lon, idx } = payload;
         try {
-          const { data } = await axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=7318f9d16165f2ed696d529c2a4bcc86`);
+          const { data } = await axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=d0aef4da9ac1a34e09e4ce9ff137ae24&units=imperial`);
           return {data, idx}
       } catch (error) {
       if (!error?.response) {
@@ -34,9 +35,11 @@ const countriesSlice = createSlice({
         loading:false
     },
     reducers: {
-        addCountry: (state, { payload }) => !state.arr.includes(payload) ? {...state, arr: [...state.arr, payload]} : {state},
+        addCountry: (state, { payload }) => {
+          state.arr = !state.arr.includes(payload) ? [...state.arr, payload] : state.arr
+        },
         removeCountry: (state, { payload }) => {
-        state.arr = deleteCity(state.arr, payload) 
+          state.arr = [...deleteCity(state.arr, payload)]
         },
         // updateCountry: (state, {payload}) => {state.arr = updateElById(state.arr, payload.idx, payload.data)}
         

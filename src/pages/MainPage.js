@@ -26,30 +26,24 @@ export default function MainPage() {
       setCity('')
     }
 
-    console.log('cities', cities)
-
-
     useEffect(() => {
-      console.log('countries', countries)
-      try {
-      countries.forEach(async (country) => {
-          const { data } = await axios.get(`/weather?q=${country}&appid=7318f9d16165f2ed696d529c2a4bcc86&units=imperial`);
-          setCities(prev => {
-            if (!prev.includes(data)) {
-              return [...prev, data]
-            } else {
-              return prev
-            }
-          })
-          
+      countries?.forEach((country) => {
+          axios.get(`/weather?q=${country}&appid=d0aef4da9ac1a34e09e4ce9ff137ae24&units=imperial`).then(({data}) => {
+            // const updated = cities.filter(cityObj => cityObj.name === country);
+            // setCities(updated)
+            setCities(pr => {
+              if (pr && pr?.find(c => c.name === country)) {
+                return pr
+              }
+            return [...pr, data]
+          });
       })
-    } catch (error) {
-      console.log('error', error)
-    }
+    })
+    console.log('effect', cities, countries)
     }, [countries]);
 
     const { weather, loading } = searchCountry;
-
+    console.log('render')
       return (
           <>
             <h1>
@@ -67,7 +61,7 @@ export default function MainPage() {
       ) :
         (<h2>make a search</h2>)}
       <h3>Your favourites countries</h3>
-      {cities.length > 0 ? (
+      {cities ? (
         <ul style={{display:'flex', flexWrap:'wrap', margin:'0 auto'}}>
           {cities.map((c,idx) => (
             <li style={{ border: '1px solid black',cursor:'pointer' }} key={uuidv4()}><p>{c.name}</p>
@@ -77,9 +71,7 @@ export default function MainPage() {
                       <Link to={`/details/${c.name}`}>Details</Link>
                   </div>
                   <button onClick={() => dispatch(removeCountry(c.name))}>remove</button>
-                  <button onClick={() => {
-                      dispatch(updateWeatherAction({ lon: c.coord.lon, lat: c.coord.lat, idx: idx }))
-                  }
+                  <button onClick={() => dispatch(updateWeatherAction({ lon: c.coord.lon, lat: c.coord.lat, idx: idx }))
                   }>update</button>
             </li>))}
       </ul>

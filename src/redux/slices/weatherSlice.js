@@ -6,7 +6,7 @@ export const fetchWeatherAction = createAsyncThunk(
   "weather/fetchWeather",
     async (payload, { rejectWithValue, getState, dispatch }) => {
       try {
-          const { data } = await axios.get(`/weather?q=${payload}&appid=7318f9d16165f2ed696d529c2a4bcc86&units=imperial`);
+          const { data } = await axios.get(`/weather?q=${payload}&appid=d0aef4da9ac1a34e09e4ce9ff137ae24&units=imperial`);
           return data;
       } catch (error) {
       if (!error?.response) {
