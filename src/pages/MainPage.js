@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { fetchWeatherAction } from '../redux/slices/weatherSlice';
 import { getSearchedWeather } from '../redux/weather/weatherSelectors';
 import { getCountries } from '../redux/countries/countriesSelectors';
-import { addCountry,removeCountry, updateWeatherAction } from '../redux/slices/countriesSlice';
+import { addCountry,removeCountry } from '../redux/slices/countriesSlice';
 import axios from 'axios';
 
 
@@ -14,7 +14,6 @@ export default function MainPage() {
     const searchCountry = useSelector(getSearchedWeather)
     const countries = useSelector(getCountries);
     const [city, setCity] = useState('');
-
     const [cities, setCities] = useState([]);
 
     const onHandleChange = (e) => {
@@ -27,10 +26,19 @@ export default function MainPage() {
     }
 
     useEffect(() => {
+      const newCities = [];
+      for (let i = 0; i < countries.length; i++) {
+        cities.forEach(city => {
+          if (city.name === countries[i]) {
+            newCities.push(city)
+          }
+        })
+      }
+
+      setCities(newCities)
+      
       countries?.forEach((country) => {
           axios.get(`/weather?q=${country}&appid=d0aef4da9ac1a34e09e4ce9ff137ae24&units=imperial`).then(({data}) => {
-            // const updated = cities.filter(cityObj => cityObj.name === country);
-            // setCities(updated)
             setCities(pr => {
               if (pr && pr?.find(c => c.name === country)) {
                 return pr
@@ -39,10 +47,23 @@ export default function MainPage() {
           });
       })
     })
-    console.log('effect', cities, countries)
     }, [countries]);
 
+    async function updateCity({lat, lon, name}) {
+      const { data } = await axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=d0aef4da9ac1a34e09e4ce9ff137ae24&units=imperial`);
+      setCities(prev => {
+        return prev.map(city => {
+          if (city.name === name) {
+            return data;
+          } else {
+            return city;
+          }
+        })
+      })
+    }
+
     const { weather, loading } = searchCountry;
+
     console.log('render')
       return (
           <>
@@ -71,7 +92,7 @@ export default function MainPage() {
                       <Link to={`/details/${c.name}`}>Details</Link>
                   </div>
                   <button onClick={() => dispatch(removeCountry(c.name))}>remove</button>
-                  <button onClick={() => dispatch(updateWeatherAction({ lon: c.coord.lon, lat: c.coord.lat, idx: idx }))
+                  <button onClick={() => updateCity({ lon: c.coord.lon, lat: c.coord.lat, name: c.name })
                   }>update</button>
             </li>))}
       </ul>
